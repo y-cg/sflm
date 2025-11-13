@@ -1,0 +1,9 @@
+inputs:
+  githooks:
+    url: github:y-cg/githooks.nix/master
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
+  nixpkgs-unstable:
+    url: github:NixOS/nixpkgs/master
+nixpkgs:
+  allowUnfree: true
