@@ -22,8 +22,16 @@ class SFLM(pl.LightningModule):
         block_size: The maximum length of input sequences, i.e. maximum value of :math:`L`.
     """
 
-    def __init__(self, vocab_size: int, emb_dim: int, block_size: int) -> None:
+    def __init__(
+        self,
+        vocab_size: int,
+        emb_dim: int,
+        block_size: int,
+        lr: float = 0.01,
+        weight_decay=0.0,
+    ) -> None:
         super().__init__()
+        self.save_hyperparameters()
         self.vocab_size: int = vocab_size
         r"""The size of the vocabulary, i.e. V."""
         self.emb_dim: int = emb_dim
@@ -64,7 +72,11 @@ class SFLM(pl.LightningModule):
         return loss
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
-        optimizer = torch.optim.AdamW(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.AdamW(
+            self.parameters(),
+            lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
+        )
         return optimizer
 
     def forward(self, idx: LongTensor) -> FloatTensor:
