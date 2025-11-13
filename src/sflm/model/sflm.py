@@ -72,6 +72,13 @@ class SFLM(pl.LightningModule):
         self.log("train_loss", loss)
         return loss
 
+    def validation_step(self, batch, batch_idx):
+        inputs = batch[:, :-1]
+        targets = batch[:, 1:]
+        logits = self.forward(inputs)
+        loss = nn.functional.cross_entropy(logits.flatten(0, 1), targets.flatten(0, 1))
+        self.log("val_loss", loss)
+
     def configure_optimizers(self) -> OptimizerLRScheduler:
         optimizer = torch.optim.AdamW(
             self.parameters(),
