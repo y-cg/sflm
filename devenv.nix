@@ -39,9 +39,12 @@ in
   };
 
   # https://devenv.sh/git-hooks/
-  git-hooks.hooks = {
-    ruff.enable = true;
-    ruff-format.enable = true;
+  git-hooks = {
+    hooks = {
+      ruff.enable = true;
+      ruff-format.enable = true;
+    };
+    package = pkgs.prek;
   };
 
   # See full reference at https://devenv.sh/reference/options/
