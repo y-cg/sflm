@@ -1,7 +1,8 @@
 import torch
 
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from typing import Optional, Callable, Any
+import lightning as pl
 
 
 class LangABC(Dataset):
@@ -55,3 +56,76 @@ class LangABC(Dataset):
         if self.transform is not None:
             out = self.transform(out)
         return out
+
+
+class LangABCDataModule(pl.LightningDataModule):
+    r"""A LightningDataModule for LangABC dataset.
+
+    Args:
+        batch_size: The batch size.
+        max_len: The maximum length of strings defined for this language.
+            Note: BOS and EOS not included.
+        transform: The transform function for preprocessing.
+        num_workers: The number of workers for data loading.
+    """
+
+    def __init__(
+        self,
+        size: int,
+        max_len: int,
+        batch_size: int = 32,
+        transform: Optional[Callable[[str], Any]] = None,
+        num_workers: int = 0,
+    ) -> None:
+        super().__init__()
+        self.size: int = size
+        self.batch_size: int = batch_size
+        self.max_len: int = max_len
+        self.transform: Optional[Callable[[str], Any]] = transform
+        self.num_workers: int = num_workers
+        self.train_set: Optional[Dataset] = None
+        self.val_set: Optional[Dataset] = None
+        self.test_set: Optional[Dataset] = None
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        if stage == "fit" or stage is None:
+            self.train_set = LangABC(
+                size=int(self.size * 0.8),
+                max_len=self.max_len,
+                transform=self.transform,
+            )
+            self.val_set = LangABC(
+                size=int(self.size * 0.1),
+                max_len=self.max_len,
+                transform=self.transform,
+            )
+        if stage == "test" or stage is None:
+            self.test_set = LangABC(
+                size=int(self.size * 0.1),
+                max_len=self.max_len,
+                transform=self.transform,
+            )
+
+    def train_dataloader(self) -> DataLoader:
+        return torch.utils.data.DataLoader(
+            self.train_set,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+        )
+
+    def val_dataloader(self) -> DataLoader:
+        return torch.utils.data.DataLoader(
+            self.val_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+        )
+
+    def test_dataloader(self) -> DataLoader:
+        return torch.utils.data.DataLoader(
+            self.test_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+        )

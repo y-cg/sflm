@@ -1,3 +1,3 @@
-from tokenizer import TokenizerABC
+from .tokenizer import TokenizerABC
 
 __all__ = ["TokenizerABC"]

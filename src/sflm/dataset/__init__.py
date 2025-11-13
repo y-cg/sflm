@@ -1,5 +1,6 @@
-from .lang import LangABC
+from .lang import LangABC, LangABCDataModule
 
 __all__ = [
     "LangABC",
+    "LangABCDataModule",
 ]
