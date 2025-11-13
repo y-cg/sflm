@@ -1,5 +1,7 @@
 from argparse import ArgumentParser
 
+import s3fs
+import os
 from torch import Tensor
 
 from sflm.dataset import LangABCDataModule
@@ -7,6 +9,7 @@ from sflm.model.sflm import SFLM
 from sflm.utils import TokenizerABC
 import lightning as pl
 from lightning.pytorch import seed_everything
+from dotenv import load_dotenv
 
 
 def config():
@@ -41,11 +44,18 @@ def config():
     parser.add_argument("--wd", type=float, default=0.0, help="The weight decay.")
     parser.add_argument("--batch-size", type=int, default=64, help="The batch size.")
     parser.add_argument("--seed", type=int, default=42, help="The random seed.")
+    parser.add_argument(
+        "--upload-to-s3", action="store_true", help="Whether to upload results to S3."
+    )
 
     return parser.parse_args()
 
 
 if __name__ == "__main__":
+    # dotenv injection
+    load_dotenv()
+
+    # parse config
     config = config()
 
     seed_everything(config.seed, workers=True)
@@ -75,3 +85,17 @@ if __name__ == "__main__":
     )
 
     trainer.fit(model, datamodule=dm)
+
+    if config.upload_to_s3:
+        # upload results to s3
+        s3 = s3fs.S3FileSystem(
+            key=os.getenv("S3_ACCESS_KEY"),
+            secret=os.getenv("S3_SECRET_KEY"),
+            endpoint_url=os.getenv("S3_ENDPOINT_URL"),
+        )
+
+        s3.upload(
+            "lightning_logs/",
+            os.getenv("S3_BUCKET_NAME") + "/lightning_logs/",
+            recursive=True,
+        )
