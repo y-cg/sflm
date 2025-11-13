@@ -69,6 +69,7 @@ class SFLM(pl.LightningModule):
         targets = batch[:, 1:]
         logits = self.forward(inputs)
         loss = nn.functional.cross_entropy(logits.flatten(0, 1), targets.flatten(0, 1))
+        self.log("train_loss", loss)
         return loss
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
