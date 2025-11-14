@@ -8,7 +8,6 @@ from sflm.utils import TokenizerABC
 import lightning as pl
 from lightning.pytorch import seed_everything
 from dotenv import load_dotenv
-import torch
 
 
 def config():
@@ -55,7 +54,6 @@ if __name__ == "__main__":
     config = config()
 
     seed_everything(config.seed, workers=True)
-    torch.use_deterministic_algorithms(True)
 
     tokenizer = TokenizerABC()
 
