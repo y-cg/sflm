@@ -22,6 +22,8 @@ in
     jupyter-notebook.enable = true;
   };
 
+  devcontainer.enable = true;
+
   # https://devenv.sh/packages/
   packages = with pkgs-unstable; [ claude-code ];
 
